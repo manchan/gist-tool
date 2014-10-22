@@ -1,0 +1,77 @@
+@import url(http://fonts.googleapis.com/css?family=Alegreya+Sans:400,700);
+
+.container, h1, h2, h3, h4, h5, h6 {
+    font-family: 'Alegreya Sans', sans-serif;
+}
+
+body {
+    background-color: #000000;
+    padding-top: 100px;
+    font-size: 20px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+p {
+    color: white;
+}
+.center {
+    text-align: center;
+}
+a.center {
+    text-align: center;
+}
+h1 {
+    color: #ffffff;
+    font-weight:bold;
+    text-align: center;
+}
+h2 {
+    display: block;
+    width: 100%;
+    font-weight: 300;
+    font-size: 20px;
+    margin-bottom: 50px;
+    text-align: center;
+}
+h3 {
+    color: #EB6100;
+}
+a {
+    color: #9b9b9b;
+    cursor: pointer;
+}
+a:hover{
+    color: #464646;
+}
+.container {
+    margin-bottom:80px;
+    width:100%;
+    margin: auto 0;
+}
+#header {
+    text-align:center;
+}
+#octcat{
+    height:40px; width:40px;
+}
+.ava_img{
+    height:50px; width:50px;
+}
+#form {
+    width:450px;
+    margin:0 auto;
+    margin-top: 10px;
+    float:none;
+}
+#form .form-control {
+    display:inline;
+    width:330px;
+}
+#form .tt-hint {
+    margin:4.5px 9.5px;
+    height: 25px;
+}
+#form button {
+    margin:4px 0 0 5px;
+    width:80px;
+}
