@@ -1,3 +1,5 @@
+$.support.cors = true;
+
 function SelectText(element) {
     var text = document.getElementById(element);
     var userAgent = window.navigator.userAgent.toLowerCase();
@@ -24,19 +26,27 @@ function getEmbedSrc(url){
         url: url,
         dataType: 'html',
         cache: false,
+        crossDomain: 'true',
         success: function(data){
+
             if(data){
                 var rep= data.replace(/document.write\(|'\)|'/g,"").replace(/\\n/g, "\n").replace(/\\/g, "");
                 $("#gist_src").text("");
-                hoge = rep.split("\n");
                 $("#gist_src").append(rep);
             }
         },
         error: function(){
-            $("#response").hide();
+
+//            setTimeout(function() {
+//                $.getScript(url, function(){
+//                    alert("Script loaded and executed.");
+//                });
+//            }, 100)
+//            $("#response").hide();
         }
     });
 }
+
 
 function get_api(url, q){
 
