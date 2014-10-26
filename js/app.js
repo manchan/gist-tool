@@ -21,9 +21,11 @@ function SelectText(element) {
 
 function getEmbedSrc(url){
 
+    var re_url = "http://github-gist.appspot.com/getdata.php?url="+url;
+
     $.ajax({
         type: 'GET',
-        url: url,
+        url: re_url,
         dataType: 'html',
         cache: false,
         crossDomain: 'true',
@@ -47,7 +49,6 @@ function getEmbedSrc(url){
     });
 }
 
-
 function get_api(url, q){
 
     var gist_id = q;
@@ -67,6 +68,7 @@ function get_api(url, q){
                 $("#owner_txt").append(ava_img);
                 $("#desc_txt").text("Description: "+data.description);
 
+                var count = 0;
                 jQuery.each(data.files, function(k, val) {
 
                     var file_name = val.filename;
@@ -79,7 +81,11 @@ function get_api(url, q){
                         +"\n-------------------------\n\n"
                         +content+
                         "\n\n</code></pre></noscript>";
-                    $('#embed').show().text(embed_html);
+
+                    $('#desc_txt').after("<br><a onclick='getThis(this);' href='javascript:void(0)' class='select_txt' id='select"+count+"'>Select Embed Code</a><br>");
+                    $('#select'+count).after("<pre id='embed"+count+"'></pre>");
+                    $('#embed'+count).show().text(embed_html);
+                    count++;
                 });
 
                 getEmbedSrc('https://gist.github.com/' + owner + '/' + gist_id + '.js');
@@ -92,6 +98,10 @@ function get_api(url, q){
     });
 }
 
+function getThis(element){
+    SelectText($('#'+element.id).next("pre").attr("id"));
+}
+
 $(function(){
     $("#response").hide();
     $('#submitBt').on('click', function(){
@@ -99,9 +109,5 @@ $(function(){
         var q = $(".tt-query").val();
         var api = 'https://api.github.com/gists/' + q;
         get_api(api, q);
-    });
-    $('#select').on('click', function(e){
-        SelectText('embed');
-        e.preventDefault();
     });
 });
