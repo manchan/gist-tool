@@ -60,6 +60,9 @@ function get_api(url, q){
         cache: false,
         success: function(data){
             $("#response").show();
+            $('pre[id^="embed"]').hide();
+            $('.select_txt').hide();
+
             if(data){
                 gist_id = data.id;
                 var owner = data.owner.login;
