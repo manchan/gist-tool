@@ -1,6 +1,24 @@
-$.support.cors = true;
+/**
+ *　Gist
+ *
+ * @constructor
+ */
+function Gist() {
+    this.q = '';
+    this.api_url = 'https://api.github.com/gists/';
+    this.cross_domain_url = 'http://github-gist.appspot.com/getdata.php?url=';
+    this.response_field = $('#response');
+    this.result_txt = $("#result");
+    this.owner = $("#owner");
+    this.desc = $("#desc");
+}
 
-function SelectText(element) {
+/**
+ * SelectText
+ * @param element
+ */
+Gist.prototype.SelectText = function(element) {
+
     var text = document.getElementById(element);
     var userAgent = window.navigator.userAgent.toLowerCase();
     if (userAgent.indexOf('msie') != -1) {
@@ -17,100 +35,117 @@ function SelectText(element) {
         var selection = window.getSelection();
         selection.setBaseAndExtent(text, 0, text, 1);
     }
-}
+};
 
-function getEmbedSrc(url){
-
-    var re_url = "http://github-gist.appspot.com/getdata.php?url="+url;
+/**
+ * GetEmbedSrc
+ * @param url
+ */
+Gist.prototype.GetEmbedSrc = function(url){
 
     $.ajax({
         type: 'GET',
-        url: re_url,
+        url: this.cross_domain_url + url,
         dataType: 'html',
         cache: false,
         crossDomain: 'true',
         success: function(data){
-
             if(data){
                 var rep= data.replace(/document.write\(|'\)|'/g,"").replace(/\\n/g, "\n").replace(/\\/g, "");
-                $("#gist_src").text("");
-                $("#gist_src").append(rep);
+                $("#gist_src").text("").append(rep);
             }
         },
         error: function(){
-
-//            setTimeout(function() {
-//                $.getScript(url, function(){
-//                    alert("Script loaded and executed.");
-//                });
-//            }, 100)
-//            $("#response").hide();
+            alert('Network Error. Reload browser please.');
         }
     });
-}
+};
 
-function get_api(url, q){
+/**
+ * OneGistGet
+ * @param url
+ * @param q
+ * @returns {*}
+ */
+Gist.prototype.OneGistGet = function(url, q){
 
-    var gist_id = q;
+    this.q = q;
+    var defer = $.Deferred();
 
     $.ajax({
-        type: 'GET',
         url: url,
         dataType: 'json',
         cache: false,
-        success: function(data){
-            $("#response").show();
-            $('pre[id^="embed"]').hide();
-            $('.select_txt').hide();
-
-            if(data){
-                gist_id = data.id;
-                var owner = data.owner.login;
-                $("#owner_txt").text("Owner: "+ owner);
-                var ava_img = "<img src='"+data.owner.avatar_url+"' alt='"+owner+"' class='ava_img'/>";
-                $("#owner_txt").append(ava_img);
-                $("#desc_txt").text("Description: "+data.description);
-
-                var count = 0;
-                jQuery.each(data.files, function(k, val) {
-
-                    var file_name = val.filename;
-                    var content = val.content;
-                    var lang = val.language;
-                    var raw_url = val.raw_url;
-                    var embed_html = "<script src='https://gist.github.com/"+ gist_id  +".js'></script>\n";
-                    embed_html += "<noscript><pre><code>"
-                        +"\n\nFile: "+ file_name
-                        +"\n-------------------------\n\n"
-                        +content+
-                        "\n\n</code></pre></noscript>";
-
-                    $('#desc_txt').after("<br><a onclick='getThis(this);' href='javascript:void(0)' class='select_txt' id='select"+count+"'>Select Embed Code</a><br>");
-                    $('#select'+count).after("<pre id='embed"+count+"'></pre>");
-                    $('#embed'+count).show().text(embed_html);
-                    count++;
-                });
-
-                getEmbedSrc('https://gist.github.com/' + owner + '/' + gist_id + '.js');
-            }
-        },
-        error: function(){
-            $("#response").hide();
-            $("#result").text("Not Found " + gist_id);
-        }
+        success: defer.resolve,
+        error: defer.reject
     });
-}
 
-function getThis(element){
-    SelectText($('#'+element.id).next("pre").attr("id"));
-}
+    return defer.promise();
+};
+
+/**
+ * ResponseFormat
+ * @param data
+ */
+Gist.prototype.ResponseFormat = function(data){
+
+    var obj = this;
+    this.response_field.show();
+    $('pre[id^="embed"]').hide();
+    $('.select_txt').hide();
+
+    if(data){
+        var gist_id = data.id;
+        var owner_name = data.owner.login;
+        var ava_img = "<img src='"+data.owner.avatar_url+"' alt='" + owner_name + "' class='ava_img'/>";
+        this.owner.text("Owner: "+ owner_name).append(ava_img);
+        this.desc.text("Description: "+data.description);
+
+        var count = 0;
+        $.each(data.files, function(k, v) {
+
+            var embed_html = "<script src='https://gist.github.com/"+ gist_id  +".js'></script>\n";
+            embed_html +=
+                "<noscript><pre><code>"
+                + "\n\nFile: " + v.filename
+                + "\n-------------------------\n\n "
+                + v.content +
+                "\n\n</code></pre></noscript>";
+
+            obj.desc.after("<br><a href='javascript:void(0)' class='select_txt' id='select"+count+"'>Select Embed Code</a><br>");
+            $('#select'+count).after("<pre id='embed"+count+"'></pre>");
+            $('#embed'+count).show().text(embed_html);
+            count++;
+        });
+
+        obj.GetEmbedSrc('https://gist.github.com/' + owner_name + '/' + gist_id + '.js');
+    }
+};
 
 $(function(){
-    $("#response").hide();
+
+    var gist = new Gist();
+    gist.response_field.hide();
+
     $('#submitBt').on('click', function(){
-        $("#result").text("");
+        gist.result_txt.text("");
         var q = $(".tt-query").val();
-        var api = 'https://api.github.com/gists/' + q;
-        get_api(api, q);
+
+        gist.OneGistGet(gist.api_url + q, q)
+            .done(function(data){
+                gist.ResponseFormat(data);
+            })
+            .fail(function(){
+                gist.response_field.hide();
+                gist.result_txt.text("Not Found " + gist.q);
+            });
+    });
+
+    /**
+     * Select Embed Code
+     */
+    $(document).on('click','.select_txt', function(){
+        var selected_custom = $('#'+this.id).next("pre").attr("id");
+        gist.SelectText(selected_custom);
     });
 });
