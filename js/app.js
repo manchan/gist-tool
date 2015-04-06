@@ -110,7 +110,8 @@ Gist.prototype.ResponseFormat = function(data){
                 + "\n\nFile: " + v.filename
                 + "\n-------------------------\n\n "
                 + v.content +
-                "\n\n</code></pre></noscript>";
+                "\n\n</code></pre></noscript>\n"+
+				"use with <a href='http://manchan.github.io/gist-tool/'>Gist Search</a>";
 
             obj.desc.after("<br><a href='javascript:void(0)' class='select_txt' id='select"+count+"'>Select Embed Code</a><br>");
             $('#select'+count).after("<pre id='embed"+count+"'></pre>");
